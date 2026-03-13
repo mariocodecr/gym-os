@@ -14,7 +14,7 @@ interface JwtPayload {
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private prisma: PrismaService,
+    private readonly prisma: PrismaService,
     configService: ConfigService,
   ) {
     super({

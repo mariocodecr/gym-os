@@ -8,10 +8,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
+import { CurrentUser, Roles } from '../../common/decorators';
+import { JwtAuthGuard, RolesGuard } from '../../common/guards';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { MembersService } from './members.service';
 
@@ -24,7 +22,7 @@ interface AuthUser {
 @Controller('members')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class MembersController {
-  constructor(private membersService: MembersService) {}
+  constructor(private readonly membersService: MembersService) {}
 
   @Get()
   @Roles(UserRole.admin, UserRole.coach)

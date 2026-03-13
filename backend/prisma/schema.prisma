@@ -128,7 +128,7 @@ model Payment {
 
   gym        Gym        @relation(fields: [gymId], references: [id], onDelete: Cascade)
   member     Member     @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  membership Membership @relation(fields: [membershipId], references: [id])
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Restrict)
 
   @@map("payments")
 }
@@ -233,7 +233,7 @@ model BlogPost {
   updatedAt   DateTime  @updatedAt
 
   gym    Gym  @relation(fields: [gymId], references: [id], onDelete: Cascade)
-  author User @relation(fields: [authorId], references: [id])
+  author User @relation(fields: [authorId], references: [id], onDelete: Restrict)
 
   @@unique([gymId, slug])
   @@map("blog_posts")

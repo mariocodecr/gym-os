@@ -4,7 +4,7 @@ import type { CreateMemberDto } from './dto/create-member.dto';
 
 @Injectable()
 export class MembersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   findAll(gymId: string) {
     return this.prisma.member.findMany({
