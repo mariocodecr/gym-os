@@ -36,6 +36,13 @@ export class MembersController {
     return this.membersService.findOne(id, user.gymId);
   }
 
+  @Get(':id/qr')
+  @Roles(UserRole.admin)
+  async getQrCode(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    const dataUrl = await this.membersService.getQrCode(id, user.gymId);
+    return { qrCode: dataUrl };
+  }
+
   @Post()
   @Roles(UserRole.admin)
   create(@Body() dto: CreateMemberDto, @CurrentUser() user: AuthUser) {

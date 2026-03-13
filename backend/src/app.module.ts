@@ -11,6 +11,8 @@ import { ExpensesModule } from './modules/expenses/expenses.module';
 import { AttendanceModule } from './modules/attendance/attendance.module';
 import { WodsModule } from './modules/wod/wods.module';
 import { ResultsModule } from './modules/results/results.module';
+import { BlogModule } from './modules/blog/blog.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { ResultsModule } from './modules/results/results.module';
     AttendanceModule,
     WodsModule,
     ResultsModule,
+    BlogModule,
+    DashboardModule,
   ],
 })
 export class AppModule {}
