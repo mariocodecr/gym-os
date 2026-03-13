@@ -1,0 +1,240 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Gym {
+  id        String   @id @default(cuid())
+  name      String
+  address   String?
+  email     String   @unique
+  whatsapp  String?
+  logoUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users       User[]
+  members     Member[]
+  memberships Membership[]
+  payments    Payment[]
+  expenses    Expense[]
+  attendance  Attendance[]
+  wods        Wod[]
+  wodResults  WodResult[]
+  blogPosts   BlogPost[]
+
+  @@map("gyms")
+}
+
+enum UserRole {
+  admin
+  coach
+  member
+}
+
+model User {
+  id           String   @id @default(cuid())
+  gymId        String
+  name         String
+  email        String
+  passwordHash String
+  role         UserRole @default(member)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  gym       Gym        @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  member    Member?
+  blogPosts BlogPost[]
+
+  @@unique([gymId, email])
+  @@map("users")
+}
+
+enum MemberLevel {
+  beginner
+  intermediate
+  advanced
+}
+
+model Member {
+  id        String      @id @default(cuid())
+  gymId     String
+  userId    String      @unique
+  phone     String?
+  birthDate DateTime?
+  height    Float?
+  weight    Float?
+  level     MemberLevel @default(beginner)
+  qrCode    String      @unique @default(cuid())
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  gym        Gym          @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments   Payment[]
+  attendance Attendance[]
+  wodResults WodResult[]
+
+  @@map("members")
+}
+
+model Membership {
+  id           String   @id @default(cuid())
+  gymId        String
+  name         String
+  price        Float
+  durationDays Int
+  description  String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  gym      Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  payments Payment[]
+
+  @@map("memberships")
+}
+
+enum PaymentMethod {
+  cash
+  card
+  transfer
+  mercadopago
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  overdue
+}
+
+model Payment {
+  id           String        @id @default(cuid())
+  gymId        String
+  memberId     String
+  membershipId String
+  amount       Float
+  paymentDate  DateTime      @default(now())
+  dueDate      DateTime
+  method       PaymentMethod @default(cash)
+  status       PaymentStatus @default(paid)
+  notes        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  gym        Gym        @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  member     Member     @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  membership Membership @relation(fields: [membershipId], references: [id])
+
+  @@map("payments")
+}
+
+enum ExpenseCategory {
+  rent
+  utilities
+  equipment
+  salaries
+  marketing
+  maintenance
+  other
+}
+
+model Expense {
+  id          String          @id @default(cuid())
+  gymId       String
+  category    ExpenseCategory
+  amount      Float
+  date        DateTime        @default(now())
+  description String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  gym Gym @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  @@map("expenses")
+}
+
+model Attendance {
+  id          String   @id @default(cuid())
+  gymId       String
+  memberId    String
+  checkinDate DateTime @default(now()) @db.Date
+  checkinTime DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  gym    Gym    @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([gymId, memberId, checkinDate])
+  @@map("attendance")
+}
+
+enum WodType {
+  general
+  programming
+}
+
+model Wod {
+  id          String   @id @default(cuid())
+  gymId       String
+  title       String
+  description String
+  date        DateTime @default(now()) @db.Date
+  type        WodType  @default(general)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  gym     Gym         @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  results WodResult[]
+
+  @@map("wods")
+}
+
+enum ResultCategory {
+  rx
+  scaled
+  beginner
+}
+
+model WodResult {
+  id        String         @id @default(cuid())
+  gymId     String
+  wodId     String
+  memberId  String
+  score     String
+  category  ResultCategory @default(scaled)
+  notes     String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  gym    Gym    @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  wod    Wod    @relation(fields: [wodId], references: [id], onDelete: Cascade)
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([wodId, memberId])
+  @@map("wod_results")
+}
+
+model BlogPost {
+  id          String    @id @default(cuid())
+  gymId       String
+  title       String
+  slug        String
+  content     String
+  coverImage  String?
+  authorId    String
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  gym    Gym  @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id])
+
+  @@unique([gymId, slug])
+  @@map("blog_posts")
+}
